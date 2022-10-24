@@ -86,6 +86,7 @@ function viewRoles() {
     start();
   });
 }
+
 //add information
 function addRole() {
   connection.query("SELECT * from departments", (err, res) => {
@@ -121,6 +122,59 @@ function addRole() {
   });
 }
 
+function addDepartment() {
+  connection.query("SELECT * from departments", (err, res) => {
+    inquirer.prompt([
+      {
+        type: "input",
+        name: "department",
+        message: "What is the name of the new department?"
+      },
+    ]).then(data=>{
+      connection.query("INSERT into departments SET ?",
+      {
+        name: data.name
+      })
+      console.log('new department added')
+      start()
+    })
+  })
+};
 
+//    (first_name, last_name, role_id, manager_id)
+function addEmployee() {
+    connection.query("SELECT * from employees", (err, res) => {
+      inquirer.prompt([
+        {
+          type: "input",
+          name: "firstName",
+          message: "What is the employee's first name?"
+        },
+        {
+          type: "input",
+          name: "lastName",
+          message: "What is the employees last name?"
+        },
+        {
+          type: "list",
+          name: "roles",
+          message: "What is their role id?",
+          choices: res.map((employee) => employee.role_id),
+        },
+      ]).then(data=>{
+          connection.query('INSERT into employees SET ?', 
+          {
+              firstName: data.first_name,
+              lastName: data.last_name,
+              roles: data.role_id,
+          })
+          console.log('new role added')
+          start()
+      });
+    });
+  };
 
 //update information
+
+
+//delete
