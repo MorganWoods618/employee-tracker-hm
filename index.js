@@ -90,70 +90,75 @@ function viewRoles() {
 //add information
 function addRole() {
   connection.query("SELECT * from departments", (err, res) => {
-    inquirer.prompt([
-      {
-        type: "input",
-        name: "title",
-        message: "What is the title of the new role?"
-      },
-      {
-        type: "input",
-        name: "salary",
-        message: "What is the salary of the new role?"
-      },
-      //getting dept number
-      {
-        type: "list",
-        name: "department",
-        message: "What department is this role in?",
-        choices: res.map((department) => department.name)
-      },
-    ]).then(data=>{
-        const chosenDepartment = res.find(department=>department.name===data.department)
-        connection.query('INSERT into roles SET ?', 
+    inquirer
+      .prompt([
         {
-            title: data.title,
-            salary: data.salary,
-            department_id: chosenDepartment.id
-        })
-        console.log('new role added')
-        start()
-    });
+          type: "input",
+          name: "title",
+          message: "What is the title of the new role?",
+        },
+        {
+          type: "input",
+          name: "salary",
+          message: "What is the salary of the new role?",
+        },
+        //getting dept number
+        {
+          type: "list",
+          name: "department",
+          message: "What department is this role in?",
+          choices: res.map((department) => department.name),
+        },
+      ])
+      .then((data) => {
+        const chosenDepartment = res.find(
+          (department) => department.name === data.department
+        );
+        connection.query("INSERT into roles SET ?", {
+          title: data.title,
+          salary: data.salary,
+          department_id: chosenDepartment.id,
+        });
+        console.log("new role added");
+        start();
+      });
   });
 }
 
 function addDepartment() {
   connection.query("SELECT * from departments", (err, res) => {
-    inquirer.prompt([
-      {
-        type: "input",
-        name: "department",
-        message: "What is the name of the new department?"
-      },
-    ]).then(data=>{
-      connection.query("INSERT into departments SET ?",
-      {
-        name: data.name
-      })
-      console.log('new department added')
-      start()
-    })
-  })
-};
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          name: "department",
+          message: "What is the name of the new department?",
+        },
+      ])
+      .then((data) => {
+        connection.query("INSERT into departments SET ?", {
+          name: data.name,
+        });
+        console.log("new department added");
+        start();
+      });
+  });
+}
 
 //    (first_name, last_name, role_id, manager_id)
 function addEmployee() {
-    connection.query("SELECT * from employees", (err, res) => {
-      inquirer.prompt([
+  connection.query("SELECT * from employees", (err, res) => {
+    inquirer
+      .prompt([
         {
           type: "input",
           name: "firstName",
-          message: "What is the employee's first name?"
+          message: "What is the employee's first name?",
         },
         {
           type: "input",
           name: "lastName",
-          message: "What is the employees last name?"
+          message: "What is the employees last name?",
         },
         {
           type: "list",
@@ -161,20 +166,59 @@ function addEmployee() {
           message: "What is their role id?",
           choices: res.map((employee) => employee.role_id),
         },
-      ]).then(data=>{
-          connection.query('INSERT into employees SET ?', 
+        {
+          type: "list",
+          name: "manager",
+          message: "What is their managers last name?",
+          choices: [1, 3, 5, 7],
+        },
+      ])
+      .then((data) => {
+        connection.query(
+          "INSERT into employees SET ?",
           {
-              firstName: data.first_name,
-              lastName: data.last_name,
-              roles: data.role_id,
-          })
-          console.log('new role added')
-          start()
+            first_name: data.firstName,
+            last_name: data.lastName,
+            role_id: data.roles,
+            manager_id: data.manager,
+          },
+          (err) => {
+            if (err) throw err;
+            console.log("new employee added");
+            start();
+          }
+        );
       });
-    });
-  };
+  });
+}
 
 //update information
+function updateRole() {
+  connection.query("SELECT * from employees", (err, res) => {
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          name: "employee",
+          message: "Which employee would you like to update?",
+          choices: res.map((employee) => employee.first_name),
+        },
+        {
+          type: "list",
+          name: "roleId",
+          message: "What is their new role?",
+          choices: res.map((employee) => employee.role_id),
+        },
+      ])
+      .then((data) => {
+        connection.query(
+          "UPDATE employees SET role_id = ? where first_name = ?",
+          [data.roleId, data.employee]
+        );
+        start();
 
+      });
+  });
+}
 
 //delete
